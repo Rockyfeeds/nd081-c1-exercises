@@ -19,6 +19,7 @@ class Animal(db.Model):
     def __repr__(self):
         return '<Animal {}>'.format(self.body)
 
+
     def save_changes(self, file):
         if file:
             filename = secure_filename(file.filename)
@@ -26,12 +27,14 @@ class Animal(db.Model):
             randomFilename = str(uuid.uuid1())
             filename = randomFilename + '.' + fileExtension
             try:
-                # TODO: Get a blob client and upload the blob
-                pass
+                blob_client = blob_service.get_blob_client(container=blob_container, blob=filename)
+                blob_client.upload_blob(file)
                 if self.image_path:
-                    # TODO: Get a blob client and delete the previous blob
-                    pass
+                    old_blob = blob_service.get_blob_client(container=blob_container, blob=self.image_path)
+                    old_blob.delete_blob()
             except Exception as err:
                 flash(err)
+
+                # TODO: Get a blob client and upload the b
             self.image_path = filename
         db.session.commit()
